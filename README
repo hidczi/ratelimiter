@@ -5,3 +5,15 @@
 # Model: mx480
 # Junos: 15.1R6.7
 # Junos: 16.1R7-S3
+
+# usage:
+
+# $ ratelimiter 10.237.180.2
+# 
+# ratelimiter$ subscriber id: 77898978977
+# 
+# ratelimiter$ name of the poliсer: 10M
+
+# or using keys (-s: subscriber is, -l: name of the policer)
+
+# $ ratelimiter 10.237.180.2 -s 77898978977 -l 100M
