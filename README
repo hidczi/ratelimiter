@@ -1,1 +1,7 @@
-# ratelimiter
+# change the rate limit in Juniper routers.
+
+
+# tested on:
+# Model: mx480
+# Junos: 15.1R6.7
+# Junos: 16.1R7-S3
