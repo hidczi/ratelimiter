@@ -132,7 +132,7 @@ def shandchint(ip, username, password, subscriber_id, limit):
                         telnet.write(to_bytes(sh_conf_policer))
                         i, m, output = telnet.expect([b'{master}'], timeout=3)
                         to_preprint = output.decode('utf8')
-                        to_preprint = re.sub(r'.*\.\.\.wall policer.*', f'\npolicer {limit}: \n', to_preprint)
+                        to_preprint = re.sub(r'.*wall policer.*', f'\npolicer {limit}: \n', to_preprint)
                         policer_config = preprint(to_preprint)
 
                         print(policer_config)
