@@ -16,8 +16,8 @@ ip_re = r'(:?(2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?)$'
 hostname_re = r'(:?\d\d-[A-Z]+-[A-Z]+\d+-[A-Z]+-\d$)'
 subscriber_id_re = '7\d{10}'
 
-username = 'username'
-password = 'password'
+username = 'kochetkov-dyu'
+password = 'Ltybcjqls'
 
 prompt = f'\033[94m\nratelimiter$\033[00m'
 
@@ -47,23 +47,34 @@ def preprint(output):
     output = re.sub('\\n\\n\{master\}', '', output)
     return output
 
-def subif_limit_check(subif_conf, limit, telnet):
+def limitchecker(subif_conf, limit, telnet):
+    print(subif_conf)
     while True:
-        if re.findall(limit, subif_conf):
-            print(f'{prompt} the port configuration matches the selected profile')
-            print(subif_conf)
-            answer = input(f'{prompt} re-input? y/n: ')
-            if not re.match(answer_re, answer):
-                print(f'{prompt} invalid value.')
-                continue
-            else:
-                if answer.lower() == 'n':
-                    exit(0)
-                else:
-                    limit = limit_input()
+        show_policer = f'show configuration firewall | no-more'
+
+        telnet.write(to_bytes(show_policer))
+        time.sleep(3)
+        poliсers_config = telnet.read_very_eager().decode('utf-8')
+        if not re.findall(limit, poliсers_config):
+            print(f'{prompt} the filter with the name {limit} was not found')
+            limit = limit_input()
+            continue
         else:
-            print(f'{subif_conf}')
-        return limit
+            if re.findall(limit, subif_conf):
+                print(f'{prompt} the port configuration matches the selected profile')
+                answer = input(f'{prompt} re-input? y/n: ')
+                if not re.match(answer_re, answer):
+                    print(f'{prompt} invalid value.')
+                    continue
+                else:
+                    if answer.lower() == 'n':
+                        exit(0)
+                    else:
+                        limit = limit_input()
+                        continue
+            else:
+                break
+    return limit
 
 def sid_input():
     while True:
@@ -91,13 +102,14 @@ def limit_input():
 def shandchint(ip, username, password, subscriber_id, limit):
     with telnetlib.Telnet(ip) as telnet:
         print(f'{prompt} looking for. wait, please')
-
         search_command = f'show interfaces descriptions | match {subscriber_id}'
 
         telnet.read_until(b'ogin:')
         telnet.write(to_bytes(username))
         telnet.read_until(b'assword:')
         telnet.write(to_bytes(password))
+
+
         time.sleep(1)
         telnet.write(to_bytes(search_command))
         time.sleep(12)
@@ -114,9 +126,7 @@ def shandchint(ip, username, password, subscriber_id, limit):
             subif_conf = telnet.read_until(b"{master}").decode('utf-8')
             to_preprint = re.sub(r'.* ae\d+\.\d+.*', f'\ninterfaces {subif}: \n', subif_conf)
             subif_conf = preprint(to_preprint)
-
-            limit = subif_limit_check(subif_conf, limit, telnet)
-
+            limit = limitchecker(subif_conf, limit, telnet)
             while True:
                 answer = input(f'{prompt} right? y/n: ')
                 if not re.match(answer_re, answer):
@@ -128,7 +138,6 @@ def shandchint(ip, username, password, subscriber_id, limit):
                     else:
                         sh_conf_policer = f'show configuration firewall policer {limit}'
 
-                        telnet.read_until(b'>')
                         telnet.write(to_bytes(sh_conf_policer))
                         i, m, output = telnet.expect([b'{master}'], timeout=3)
                         to_preprint = output.decode('utf8')
