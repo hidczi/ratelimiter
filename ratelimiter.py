@@ -16,8 +16,8 @@ ip_re = r'(:?(2[0-4]\d|25[0-5]|[01]?\d\d?)\.){3}(2[0-4]\d|25[0-5]|[01]?\d\d?)$'
 hostname_re = r'(:?\d\d-[A-Z]+-[A-Z]+\d+-[A-Z]+-\d$)'
 subscriber_id_re = '7\d{10}'
 
-username = 'kochetkov-dyu'
-password = 'Ltybcjqls'
+username = 'username'
+password = 'password'
 
 prompt = f'\033[94m\nratelimiter$\033[00m'
 
